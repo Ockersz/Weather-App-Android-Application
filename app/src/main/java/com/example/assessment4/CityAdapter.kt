@@ -8,32 +8,35 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class CityAdapter(private var cities: List<String>, private val onDeleteClickListener: (String) -> Unit) :
-    RecyclerView.Adapter<CityAdapter.ViewHolder>(){
+class CityAdapter(private val cityList: ArrayList<City>, private val onDeleteClickListener: OnDeleteClickListener) : RecyclerView.Adapter<CityAdapter.CityViewHolder>() {
 
-    inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val cityNameTextView: TextView = itemView.findViewById(R.id.textCityName)
-        val deleteButton: ImageButton = itemView.findViewById(R.id.btnDelete)
+    interface OnDeleteClickListener {
+        fun onDeleteClick(cityName: String)
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val itemView = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_city, parent, false)
-        return ViewHolder(itemView)
-    }
-
-    fun updateData(newCities: List<String>) {
-        cities = newCities
-        notifyDataSetChanged()
-    }
-
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val city = cities[position]
-        holder.cityNameTextView.text = city
-        holder.deleteButton.setOnClickListener { onDeleteClickListener(city) }
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CityViewHolder {
+        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.item_city,parent,false)
+        return CityViewHolder(itemView)
     }
 
     override fun getItemCount(): Int {
-        return cities.size
+        return cityList.size
     }
+
+    override fun onBindViewHolder(holder: CityViewHolder, position: Int) {
+        val currentItem = cityList[position]
+        holder.cityName.text = currentItem.cityName
+
+        holder.btnDelete.setOnClickListener {
+            onDeleteClickListener.onDeleteClick(currentItem.cityName!!)
+        }
+    }
+
+    class CityViewHolder(itemView : View) : RecyclerView.ViewHolder(itemView){
+
+        val btnDelete: ImageButton = itemView.findViewById(R.id.btnDelete)
+        val cityName: TextView = itemView.findViewById<TextView>(R.id.textCityName)
+
+    }
+
 }
