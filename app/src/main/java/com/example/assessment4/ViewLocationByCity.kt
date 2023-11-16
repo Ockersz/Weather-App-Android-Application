@@ -17,22 +17,18 @@ import com.android.volley.Request
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.squareup.picasso.Picasso
 import java.lang.Exception
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
-/**
- * A simple [Fragment] subclass.
- * Use the [ViewLocationByCity.newInstance] factory method to
- * create an instance of this fragment.
- */
 @Suppress("UNREACHABLE_CODE")
 class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
-    // TODO: Rename and change types of parameters
     private var param1: String? = null
     private var param2: String? = null
 
@@ -66,10 +62,8 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the correct layout for this fragment
         val view = inflater.inflate(R.layout.fragment_view_location_by_city, container, false)
 
-        // Initialize your views here using 'view' as the parent
         lblDescription = view.findViewById(R.id.lblDescription)
         lblHumidity = view.findViewById(R.id.lblHumidity)
         lblTemp = view.findViewById(R.id.lblTemperature)
@@ -78,8 +72,18 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
         imgIcon = view.findViewById(R.id.imgIcon)
         btnAdd = view.findViewById(R.id.btnAdd)
         btnAddCity = view.findViewById(R.id.btnAddCity)
+        spnCity = view.findViewById(R.id.spnCity)
 
-        // Set click listeners or other operations on your views
+
+        val adapter: ArrayAdapter<String> = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, ArrayList())
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        spnCity.adapter = adapter
+
+
+        spnCity.onItemSelectedListener = this
+
+
+        loadCitiesIntoSpinner()
 
 
 
@@ -94,25 +98,35 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
         return view
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment ViewLocationByCity.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            ViewLocationByCity().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+
+
+
+    private fun loadCitiesIntoSpinner() {
+        val cityList = ArrayList<String>()
+
+        val dbref = FirebaseDatabase.getInstance("https://assessment4-c465c-default-rtdb.asia-southeast1.firebasedatabase.app/").getReference("Cities")
+
+        dbref.addValueEventListener(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()) {
+                    for (citySnapshot in snapshot.children) {
+                        val cityName = citySnapshot.key
+                        cityName?.let { cityList.add(it) }
+                    }
+
+                    val adapter = spnCity.adapter as ArrayAdapter<String>
+                    adapter.clear()
+                    adapter.addAll(cityList)
+                    adapter.notifyDataSetChanged()
                 }
             }
+
+            override fun onCancelled(error: DatabaseError) {
+                Log.e("Database", "Error reading data: ${error.message}")
+            }
+        })
     }
+
 
     private fun openAddCity() {
         val intent = Intent(requireContext(),AddNewLocations::class.java)
@@ -120,10 +134,11 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
     }
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-
+        val selectedCity = parent?.getItemAtPosition(position) as? String
+        selectedCity?.let { getWeatherInfo(it) }
     }
     override fun onNothingSelected(parent: AdapterView<*>?) {
-        TODO("Not yet implemented")
+
     }
 
     private fun onAddButtonClicked() {
