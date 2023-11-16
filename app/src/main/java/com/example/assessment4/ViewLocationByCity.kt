@@ -1,25 +1,39 @@
 package com.example.assessment4
 
-import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import androidx.fragment.app.Fragment
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.*
 import cn.pedant.SweetAlert.SweetAlertDialog
 import com.android.volley.Request
-import com.android.volley.Response
 import com.android.volley.toolbox.JsonObjectRequest
 import com.android.volley.toolbox.Volley
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.squareup.picasso.Picasso
 import java.lang.Exception
 
-class LocationCity : AppCompatActivity(),AdapterView.OnItemSelectedListener {
+// TODO: Rename parameter arguments, choose names that match
+// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM2 = "param2"
 
+/**
+ * A simple [Fragment] subclass.
+ * Use the [ViewLocationByCity.newInstance] factory method to
+ * create an instance of this fragment.
+ */
+@Suppress("UNREACHABLE_CODE")
+class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
+    // TODO: Rename and change types of parameters
+    private var param1: String? = null
+    private var param2: String? = null
 
     private lateinit var lblDescription : TextView
     private lateinit var lblTemp : TextView
@@ -31,46 +45,76 @@ class LocationCity : AppCompatActivity(),AdapterView.OnItemSelectedListener {
     private lateinit var btnAddCity: Button
     private lateinit var spnCity : Spinner
 
-    private val rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.rotate_open_animation) }
-    private val rotateClose: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.rotate_close_animation) }
-    private val fromBottom: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.from_bottom_animation) }
-    private val toBotton: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.from_top_animation) }
+    private val rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(requireContext(),R.anim.rotate_open_animation) }
+    private val rotateClose: Animation by lazy { AnimationUtils.loadAnimation(requireContext(),R.anim.rotate_close_animation) }
+    private val fromBottom: Animation by lazy { AnimationUtils.loadAnimation(requireContext(),R.anim.from_bottom_animation) }
+    private val toBotton: Animation by lazy { AnimationUtils.loadAnimation(requireContext(),R.anim.from_top_animation) }
     private var clicked = false
 
     private var cities = CityData.getInstance().getCities()
-    @SuppressLint("MissingInflatedId")
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_location_city)
-
-        spnCity = findViewById(R.id.spnCity)
-        lblDescription = findViewById(R.id.lblDescription)
-        lblHumidity = findViewById(R.id.lblHumidity)
-        lblTemp = findViewById(R.id.lblTemperature)
-        lblWindSpeed = findViewById(R.id.lblWindSpeed)
-        lblPressure  = findViewById(R.id.lblPressure)
-        imgIcon = findViewById(R.id.imgIcon)
-        btnAdd = findViewById(R.id.btnAdd)
-        btnAddCity = findViewById(R.id.btnAddCity)
-
-
-        btnAdd.setOnClickListener(){
-            onAddButtonClicked()
+        arguments?.let {
+            param1 = it.getString(ARG_PARAM1)
+            param2 = it.getString(ARG_PARAM2)
         }
-        btnAddCity.setOnClickListener(){
-            Toast.makeText(this,"This is used to add new City", Toast.LENGTH_LONG).show()
-        }
+    }
 
-        val cityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, cities)
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        // Inflate the correct layout for this fragment
+        val view = inflater.inflate(R.layout.fragment_view_location_by_city, container, false)
+
+        // Initialize your views here using 'view' as the parent
+        spnCity = view.findViewById(R.id.spnCity)
+        lblDescription = view.findViewById(R.id.lblDescription)
+        lblHumidity = view.findViewById(R.id.lblHumidity)
+        lblTemp = view.findViewById(R.id.lblTemperature)
+        lblWindSpeed = view.findViewById(R.id.lblWindSpeed)
+        lblPressure = view.findViewById(R.id.lblPressure)
+        imgIcon = view.findViewById(R.id.imgIcon)
+        btnAdd = view.findViewById(R.id.btnAdd)
+        btnAddCity = view.findViewById(R.id.btnAddCity)
+
+        // Set click listeners or other operations on your views
+
+        val cityAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, cities)
         cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
         spnCity.adapter = cityAdapter
-
         spnCity.onItemSelectedListener = this
 
-
-
+        return view
     }
+
+    companion object {
+        /**
+         * Use this factory method to create a new instance of
+         * this fragment using the provided parameters.
+         *
+         * @param param1 Parameter 1.
+         * @param param2 Parameter 2.
+         * @return A new instance of fragment ViewLocationByCity.
+         */
+        // TODO: Rename and change types and number of parameters
+        @JvmStatic
+        fun newInstance(param1: String, param2: String) =
+            ViewLocationByCity().apply {
+                arguments = Bundle().apply {
+                    putString(ARG_PARAM1, param1)
+                    putString(ARG_PARAM2, param2)
+                }
+            }
+    }
+
+    private fun openAddCity() {
+        val intent = Intent(requireContext(),AddNewLocations::class.java)
+        startActivity(intent)
+    }
+
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
         getWeatherInfo(cities[position])
     }
@@ -108,7 +152,7 @@ class LocationCity : AppCompatActivity(),AdapterView.OnItemSelectedListener {
 
 
     private fun getWeatherInfo(city: String ) {
-        val pDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
+        val pDialog = SweetAlertDialog(requireContext(), SweetAlertDialog.PROGRESS_TYPE)
         pDialog.progressHelper.barColor = Color.parseColor("#A5DC86")
         pDialog.titleText = "Loading"
         pDialog.setCancelable(false)
@@ -140,12 +184,10 @@ class LocationCity : AppCompatActivity(),AdapterView.OnItemSelectedListener {
             { error ->
                 Log.e("API", "Response Erros")
 
-                Toast.makeText(this, error.toString(), Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), error.toString(), Toast.LENGTH_LONG).show()
                 pDialog.cancel()
             })
 
-        Volley.newRequestQueue(this).add(request)
+        Volley.newRequestQueue(requireContext()).add(request)
     }
-
-
 }
