@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Assessment4</string>
+    <string name="app_name">Weather App</string>
     <string name="btnSearch">Search</string>
     <string name="cityHint">City</string>
     <string name="todo">Add City</string>
@@ -10,4 +10,7 @@
     <string name="imgWeather">WeatherImage</string>
     <string name="humidity">Humidity</string>
     <string name="add_new_city">Add New City</string>
+    <string name="enter_a_city">Enter a city</string>
+    <string name="add">Add</string>
+    <string name="delete">Delete</string>
 </resources>

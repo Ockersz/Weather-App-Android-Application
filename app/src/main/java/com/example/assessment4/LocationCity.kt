@@ -37,7 +37,7 @@ class LocationCity : AppCompatActivity(),AdapterView.OnItemSelectedListener {
     private val toBotton: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.from_top_animation) }
     private var clicked = false
 
-    private var cities = arrayOf("Colombo","Delhi","Ragama","London","Spain")
+    private var cities = CityData.getInstance().getCities()
     @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
