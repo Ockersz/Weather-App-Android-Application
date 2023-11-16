@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Assessment4</string>
+    <string name="btnSearch">Search</string>
+    <string name="cityHint">City</string>
+    <string name="todo">Add City</string>
+    <string name="wind_speed">Wind Speed</string>
+    <string name="pressure">Pressure</string>
+    <string name="temperature">Temperature</string>
+    <string name="description">Description</string>
+    <string name="imgWeather">WeatherImage</string>
+    <string name="humidity">Humidity</string>
+    <string name="add_new_city">Add New City</string>
+</resources>
