@@ -52,7 +52,7 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
     private val toBottom: Animation by lazy { AnimationUtils.loadAnimation(requireContext(),R.anim.from_top_animation) }
     private var clicked = false
 
-    private var cities = CityData.getInstance().getCities()
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,7 +70,6 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
         val view = inflater.inflate(R.layout.fragment_view_location_by_city, container, false)
 
         // Initialize your views here using 'view' as the parent
-        spnCity = view.findViewById(R.id.spnCity)
         lblDescription = view.findViewById(R.id.lblDescription)
         lblHumidity = view.findViewById(R.id.lblHumidity)
         lblTemp = view.findViewById(R.id.lblTemperature)
@@ -82,11 +81,7 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
 
         // Set click listeners or other operations on your views
 
-        val cityAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, cities)
-        cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
 
-        spnCity.adapter = cityAdapter
-        spnCity.onItemSelectedListener = this
 
         btnAdd.setOnClickListener{
             onAddButtonClicked()
@@ -125,7 +120,7 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
     }
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        getWeatherInfo(cities[position])
+
     }
     override fun onNothingSelected(parent: AdapterView<*>?) {
         TODO("Not yet implemented")
