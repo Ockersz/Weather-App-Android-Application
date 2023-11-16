@@ -1,5 +1,6 @@
 package com.example.assessment4
 
+import android.annotation.SuppressLint
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -7,10 +8,7 @@ import android.util.Log
 import android.view.View
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.TextView
-import android.widget.Toast
+import android.widget.*
 import cn.pedant.SweetAlert.SweetAlertDialog
 import com.android.volley.Request
 import com.android.volley.Response
@@ -20,10 +18,8 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.squareup.picasso.Picasso
 import java.lang.Exception
 
-class LocationCity : AppCompatActivity() {
+class LocationCity : AppCompatActivity(),AdapterView.OnItemSelectedListener {
 
-    private lateinit var btnSearch : Button
-    private lateinit var txtCity : TextView
 
     private lateinit var lblDescription : TextView
     private lateinit var lblTemp : TextView
@@ -33,6 +29,7 @@ class LocationCity : AppCompatActivity() {
     private lateinit var imgIcon: ImageView
     private lateinit var btnAdd: FloatingActionButton
     private lateinit var btnAddCity: Button
+    private lateinit var spnCity : Spinner
 
     private val rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.rotate_open_animation) }
     private val rotateClose: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.rotate_close_animation) }
@@ -40,14 +37,13 @@ class LocationCity : AppCompatActivity() {
     private val toBotton: Animation by lazy { AnimationUtils.loadAnimation(this,R.anim.from_top_animation) }
     private var clicked = false
 
-
+    private var cities = arrayOf("Colombo","Delhi","Ragama","London","Spain")
+    @SuppressLint("MissingInflatedId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_location_city)
 
-        btnSearch = findViewById(R.id.btnSearch)
-        txtCity = findViewById(R.id.txtCity)
-
+        spnCity = findViewById(R.id.spnCity)
         lblDescription = findViewById(R.id.lblDescription)
         lblHumidity = findViewById(R.id.lblHumidity)
         lblTemp = findViewById(R.id.lblTemperature)
@@ -57,14 +53,6 @@ class LocationCity : AppCompatActivity() {
         btnAdd = findViewById(R.id.btnAdd)
         btnAddCity = findViewById(R.id.btnAddCity)
 
-        btnSearch.setOnClickListener {
-            if (txtCity.text.isEmpty()) {
-                Toast.makeText(this, "Please enter City first", Toast.LENGTH_LONG).show()
-
-            } else {
-                getWeatherInfo(txtCity.text)
-            }
-        }
 
         btnAdd.setOnClickListener(){
             onAddButtonClicked()
@@ -73,6 +61,21 @@ class LocationCity : AppCompatActivity() {
             Toast.makeText(this,"This is used to add new City", Toast.LENGTH_LONG).show()
         }
 
+        val cityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, cities)
+        cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+
+        spnCity.adapter = cityAdapter
+
+        spnCity.onItemSelectedListener = this
+
+
+
+    }
+    override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+        getWeatherInfo(cities[position])
+    }
+    override fun onNothingSelected(parent: AdapterView<*>?) {
+        TODO("Not yet implemented")
     }
 
     private fun onAddButtonClicked() {
@@ -104,7 +107,7 @@ class LocationCity : AppCompatActivity() {
 
 
 
-    private fun getWeatherInfo(city: CharSequence ) {
+    private fun getWeatherInfo(city: String ) {
         val pDialog = SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE)
         pDialog.progressHelper.barColor = Color.parseColor("#A5DC86")
         pDialog.titleText = "Loading"
