@@ -1,5 +1,6 @@
 package com.example.assessment4
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
@@ -48,7 +49,7 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
     private val rotateOpen: Animation by lazy { AnimationUtils.loadAnimation(requireContext(),R.anim.rotate_open_animation) }
     private val rotateClose: Animation by lazy { AnimationUtils.loadAnimation(requireContext(),R.anim.rotate_close_animation) }
     private val fromBottom: Animation by lazy { AnimationUtils.loadAnimation(requireContext(),R.anim.from_bottom_animation) }
-    private val toBotton: Animation by lazy { AnimationUtils.loadAnimation(requireContext(),R.anim.from_top_animation) }
+    private val toBottom: Animation by lazy { AnimationUtils.loadAnimation(requireContext(),R.anim.from_top_animation) }
     private var clicked = false
 
     private var cities = CityData.getInstance().getCities()
@@ -86,6 +87,14 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
 
         spnCity.adapter = cityAdapter
         spnCity.onItemSelectedListener = this
+
+        btnAdd.setOnClickListener{
+            onAddButtonClicked()
+        }
+
+        btnAddCity.setOnClickListener{
+            openAddCity()
+        }
 
         return view
     }
@@ -144,13 +153,14 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
             btnAdd.startAnimation(rotateOpen)
         }
         else{
-            btnAddCity.startAnimation(toBotton)
+            btnAddCity.startAnimation(toBottom)
             btnAdd.startAnimation(rotateClose)
         }
     }
 
 
 
+    @SuppressLint("SetTextI18n")
     private fun getWeatherInfo(city: String ) {
         val pDialog = SweetAlertDialog(requireContext(), SweetAlertDialog.PROGRESS_TYPE)
         pDialog.progressHelper.barColor = Color.parseColor("#A5DC86")
@@ -165,11 +175,11 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
                     response ->
 
                 try {
-                    lblDescription.setText("Weather Desctiption : "+response.getJSONArray("weather").getJSONObject(0).getString("description"))
-                    lblTemp.setText("Temperature : "+response.getJSONObject("main").getString("temp")+" °F")
-                    lblPressure.setText("Pressure : "+response.getJSONObject("main").getString("pressure"))
-                    lblHumidity.setText("Humidity : "+response.getJSONObject("main").getString("humidity"))
-                    lblWindSpeed.setText("Wind Speed : "+response.getJSONObject("wind").getString("speed"))
+                    lblDescription.text ="Weather Description : "+response.getJSONArray("weather").getJSONObject(0).getString("description")
+                    lblTemp.text = "Temperature : "+response.getJSONObject("main").getString("temp")+" °F"
+                    lblPressure.text = "Pressure : "+response.getJSONObject("main").getString("pressure")
+                    lblHumidity.text = "Humidity : "+response.getJSONObject("main").getString("humidity")
+                    lblWindSpeed.text = "Wind Speed : "+response.getJSONObject("wind").getString("speed")
 
                     val imageURL = "https://openweathermap.org/img/w/" + response.getJSONArray("weather").getJSONObject(0).getString("icon") + ".png"
 
@@ -182,7 +192,7 @@ class ViewLocationByCity : Fragment(),AdapterView.OnItemSelectedListener  {
 
             },
             { error ->
-                Log.e("API", "Response Erros")
+                Log.e("API", "Response Errors")
 
                 Toast.makeText(requireContext(), error.toString(), Toast.LENGTH_LONG).show()
                 pDialog.cancel()

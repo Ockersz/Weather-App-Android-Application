@@ -10,8 +10,8 @@ class MainScreen : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main_screen)
 
-        var viewPager = findViewById(R.id.viewPager) as ViewPager
-        var tabLayout = findViewById(R.id.tabLayout) as TabLayout
+        val viewPager = findViewById<ViewPager>(R.id.viewPager)
+        val tabLayout = findViewById<TabLayout>(R.id.tabLayout)
 
         val fragmentAdapter = FragmentAdapter(supportFragmentManager)
         fragmentAdapter.addFragment(MyLocation(),"My Location")
