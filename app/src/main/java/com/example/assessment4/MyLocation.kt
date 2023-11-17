@@ -30,10 +30,9 @@ private const val ARG_PARAM2 = "param2"
 @Suppress("UNREACHABLE_CODE")
 class MyLocation : Fragment() {
 
-
-    private lateinit var locationRequest : LocationRequest
-    private lateinit var lblDescription : TextView
-    private lateinit var lblTemp : TextView
+    private lateinit var locationRequest: LocationRequest
+    private lateinit var lblDescription: TextView
+    private lateinit var lblTemp: TextView
     private lateinit var lblHumidity: TextView
     private lateinit var lblPressure: TextView
     private lateinit var lblWindSpeed: TextView
@@ -41,16 +40,15 @@ class MyLocation : Fragment() {
     private var latitude by Delegates.notNull<Double>()
     private var longitude by Delegates.notNull<Double>()
 
-    private val locationClient : FusedLocationProviderClient by lazy {
+    private val locationClient: FusedLocationProviderClient by lazy {
         LocationServices.getFusedLocationProviderClient(requireActivity())
     }
 
-    lateinit var lblLocation : TextView
+    lateinit var lblLocation: TextView
 
 
     private var param1: String? = null
     private var param2: String? = null
-
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,15 +77,25 @@ class MyLocation : Fragment() {
         lblPressure = view.findViewById(R.id.lblPressure)
         imgIcon = view.findViewById(R.id.imgIcon)
 
-        checkPermisssion()
+        checkPermission()
+
         return view
     }
 
-    private fun checkPermisssion(){
-        if(ActivityCompat.checkSelfPermission(requireActivity(),android.Manifest.permission.ACCESS_FINE_LOCATION)== PackageManager.PERMISSION_GRANTED){
+
+    private fun checkPermission() {
+        if (ActivityCompat.checkSelfPermission(
+                requireActivity(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
             accessLocation()
-        }else{
-            ActivityCompat.requestPermissions(requireActivity(), arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),100)
+        } else {
+            ActivityCompat.requestPermissions(
+                requireActivity(),
+                arrayOf(android.Manifest.permission.ACCESS_FINE_LOCATION),
+                100
+            )
         }
 
     }
@@ -95,14 +103,15 @@ class MyLocation : Fragment() {
 
     @SuppressLint("MissingPermission")
     private fun accessLocation() {
-        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY,20000).build()
+        locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 20000).build()
 
-        val locationCallBack = object : LocationCallback(){
+        val locationCallBack = object : LocationCallback() {
             @SuppressLint("SetTextI18n")
             override fun onLocationResult(p0: LocationResult) {
                 super.onLocationResult(p0)
-                p0.locations.lastOrNull()?.let {location ->
-                    lblLocation.text = "Latitude : "+location.latitude+" \n Longitude : "+location.longitude
+                p0.locations.lastOrNull()?.let { location ->
+                    lblLocation.text =
+                        "Latitude : " + location.latitude + " \n Longitude : " + location.longitude
                     latitude = location.latitude
                     longitude = location.longitude
                     getWeatherInfo()
@@ -110,58 +119,66 @@ class MyLocation : Fragment() {
             }
         }
 
-        locationClient.requestLocationUpdates(locationRequest,locationCallBack, Looper.getMainLooper())
+        locationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallBack,
+            Looper.getMainLooper()
+        )
     }
 
     @SuppressLint("SetTextI18n")
-    fun getWeatherInfo(){
-        val pDialog = SweetAlertDialog(requireContext(), SweetAlertDialog.PROGRESS_TYPE)
+    fun getWeatherInfo() {
+        val pDialog = SweetAlertDialog(context, SweetAlertDialog.PROGRESS_TYPE)
         pDialog.progressHelper.barColor = Color.parseColor("#A5DC86")
         pDialog.titleText = "Loading"
         pDialog.setCancelable(false)
         pDialog.show()
 
         Log.e("API", "Api Called")
-        val url = "https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=0e81ee6345f0bf08a5b26f1436c38b08"
-        val request = JsonObjectRequest(
-            Request.Method.GET, url, null, { response ->
 
-                try {
-                    lblDescription.setText(
-                        "Weather Desctiption : " + response.getJSONArray("weather").getJSONObject(0)
-                            .getString("description")
-                    )
-                    lblTemp.setText(
-                        "Temperature : " + response.getJSONObject("main").getString("temp") + " °F"
-                    )
-                    lblPressure.setText(
-                        "Pressure : " + response.getJSONObject("main").getString("pressure")
-                    )
-                    lblHumidity.setText(
-                        "Humidity : " + response.getJSONObject("main").getString("humidity")
-                    )
-                    lblWindSpeed.setText(
-                        "Wind Speed : " + response.getJSONObject("wind").getString("speed")
-                    )
+        // Check if the fragment is attached to a context
+        val currentContext = context
+        if (currentContext != null) {
+            val url =
+                "https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=0e81ee6345f0bf08a5b26f1436c38b08"
+            val request = JsonObjectRequest(
+                Request.Method.GET, url, null, { response ->
 
-                    val imageURL =
-                        "https://openweathermap.org/img/w/" + response.getJSONArray("weather")
-                            .getJSONObject(0).getString("icon") + ".png"
+                    try {
+                        lblDescription.text =
+                            "Weather Description : " + response.getJSONArray("weather")
+                                .getJSONObject(0).getString("description")
+                        lblTemp.text = "Temperature : " + response.getJSONObject("main")
+                            .getString("temp") + " °F"
+                        lblPressure.text =
+                            "Pressure : " + response.getJSONObject("main").getString("pressure")
+                        lblHumidity.text =
+                            "Humidity : " + response.getJSONObject("main").getString("humidity")
+                        lblWindSpeed.text =
+                            "Wind Speed : " + response.getJSONObject("wind").getString("speed")
 
-                    Picasso.get().load(imageURL).into(imgIcon)
+                        val imageURL =
+                            "https://openweathermap.org/img/w/" + response.getJSONArray("weather")
+                                .getJSONObject(0).getString("icon") + ".png"
+
+                        Picasso.get().load(imageURL).into(imgIcon)
+                        pDialog.cancel()
+                    } catch (e: Exception) {
+                        Log.e("Error", e.toString())
+                    }
+
+                },
+                { error ->
+                    Log.e("API", "Response Errors")
+
+                    Toast.makeText(currentContext, error.toString(), Toast.LENGTH_LONG).show()
                     pDialog.cancel()
-                } catch (e: Exception) {
-                    Log.e("Error", e.toString())
-                }
+                })
 
-            },
-            { error ->
-                Log.e("API", "Response Erros")
-
-                Toast.makeText(requireContext(), error.toString(), Toast.LENGTH_LONG).show()
-                pDialog.cancel()
-            })
-
-        Volley.newRequestQueue(requireContext()).add(request)
+            Volley.newRequestQueue(currentContext).add(request)
+        } else {
+            Log.e("Error", "Fragment not attached to a context")
+            pDialog.cancel()
+        }
     }
 }
