@@ -4,12 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ViewLocationByCity">
+    tools:context=".ViewLocationByCity"
+    android:id="@+id/layoutBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:ignore="UselessParent">
 
 
 
@@ -32,14 +34,16 @@
             android:layout_height="141dp"
             android:layout_marginTop="30dp"
             app:srcCompat="@android:drawable/ic_input_add"
-            android:contentDescription="@string/imgWeather" />
+            android:contentDescription="@string/imgWeather"
+            android:backgroundTint="@color/blue_btn_bg_color"/>
 
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginTop="20dp">
+            android:layout_marginTop="20dp"
+            >
 
             <TextView
                 android:id="@+id/lblDescription"
@@ -48,7 +52,8 @@
                 android:text="@string/description"
                 android:layout_marginTop="10dp"
                 android:layout_marginStart="20dp"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                android:textColor="@color/black"/>
 
             <TextView
                 android:id="@+id/lblTemperature"
@@ -57,7 +62,8 @@
                 android:text="@string/temperature"
                 android:layout_marginTop="10dp"
                 android:layout_marginStart="20dp"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                android:textColor="@color/black"/>
             <TextView
                 android:id="@+id/lblPressure"
                 android:layout_width="match_parent"
@@ -65,7 +71,8 @@
                 android:text="@string/pressure"
                 android:layout_marginTop="10dp"
                 android:layout_marginStart="20dp"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                android:textColor="@color/black"/>
             <TextView
                 android:id="@+id/lblHumidity"
                 android:layout_width="match_parent"
@@ -73,7 +80,8 @@
                 android:text="@string/humidity"
                 android:layout_marginTop="10dp"
                 android:layout_marginStart="20dp"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                android:textColor="@color/black"/>
             <TextView
                 android:id="@+id/lblWindSpeed"
                 android:layout_width="match_parent"
@@ -81,14 +89,15 @@
                 android:text="@string/wind_speed"
                 android:layout_marginTop="10dp"
                 android:layout_marginStart="20dp"
-                android:textSize="20sp"/>
+                android:textSize="20sp"
+                android:textColor="@color/black"/>
 
         </LinearLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="207dp"
-            android:layout_marginTop="20dp"
+            android:layout_height="220dp"
+            android:layout_marginTop="10dp"
 
             >
 
@@ -125,8 +134,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/weatherForcast"
                 android:layout_width="230dp"
-                android:layout_height="210dp"
-                android:layout_marginBottom="3dp"
+                android:layout_height="220dp"
+
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/btnAddCity"
