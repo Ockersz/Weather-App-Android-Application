@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MyLocation">
+    tools:context=".MyLocation"
+    android:id="@+id/layoutWeather">
 
 <LinearLayout
     android:layout_width="match_parent"
@@ -15,12 +16,14 @@
     android:layout_height="wrap_content"
     android:textSize="24sp"
     android:layout_marginTop="50dp"
-    android:text="Location"
+    android:text="@string/location"
     android:textAlignment="center"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent" />
+    app:layout_constraintTop_toTopOf="parent"
+        android:textStyle="bold"
+        android:textColor="@color/black"/>
 
 </LinearLayout>
 
@@ -35,54 +38,61 @@
             android:id="@+id/imgIcon"
             android:layout_width="match_parent"
             android:layout_height="141dp"
-            app:srcCompat="@android:drawable/ic_input_add" />
+            app:srcCompat="@android:drawable/ic_input_add"
+            android:contentDescription="@string/todo" />
 
         <TextView
             android:id="@+id/lblDescription"
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:text="Description"
+            android:text="@string/description"
             android:layout_marginTop="20dp"
-            android:layout_marginLeft="20dp"
-            android:textSize="20sp"/>
+            android:layout_marginStart="20dp"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            />
 
         <TextView
             android:id="@+id/lblTemperature"
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:text="Temperature"
+            android:text="@string/temperature"
             android:layout_marginTop="10dp"
-            android:layout_marginLeft="20dp"
-            android:textSize="20sp"/>
+            android:layout_marginStart="20dp"
+            android:textSize="20sp"
+            android:textColor="@color/black"/>
         <TextView
             android:id="@+id/lblPressure"
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:text="Pressure"
+            android:text="@string/pressure"
             android:layout_marginTop="10dp"
-            android:layout_marginLeft="20dp"
-            android:textSize="20sp"/>
+            android:layout_marginStart="20dp"
+            android:textSize="20sp"
+            android:textColor="@color/black"/>
         <TextView
             android:id="@+id/lblHumidity"
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:text="Humidity"
+            android:text="@string/humidity"
             android:layout_marginTop="10dp"
-            android:layout_marginLeft="20dp"
-            android:textSize="20sp"/>
+            android:layout_marginStart="20dp"
+            android:textSize="20sp"
+            android:textColor="@color/black"/>
         <TextView
             android:id="@+id/lblWindSpeed"
             android:layout_width="match_parent"
             android:layout_height="30dp"
-            android:text="Wind Speed"
+            android:text="@string/wind_speed"
             android:layout_marginTop="10dp"
-            android:layout_marginLeft="20dp"
-            android:textSize="20sp"/>
+            android:layout_marginStart="20dp"
+            android:textSize="20sp"
+            android:textColor="@color/black"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvWeather"
             android:layout_width="match_parent"
-            android:layout_height="210dp"
+            android:layout_height="220dp"
             android:layout_marginBottom="3dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -91,7 +101,5 @@
             android:layout_marginTop="20dp"/>
 
     </LinearLayout>
-
-
 
 </RelativeLayout>

@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -42,6 +43,7 @@ class MyLocation : Fragment() {
     private lateinit var lblPressure: TextView
     private lateinit var lblWindSpeed: TextView
     private lateinit var imgIcon: ImageView
+    private lateinit var relativeLayout: RelativeLayout
     private var latitude by Delegates.notNull<Double>()
     private var longitude by Delegates.notNull<Double>()
 
@@ -71,6 +73,8 @@ class MyLocation : Fragment() {
         lblPressure = view.findViewById(R.id.lblPressure)
         imgIcon = view.findViewById(R.id.imgIcon)
         recyclerView = view.findViewById(R.id.rvWeather)
+        relativeLayout = view.findViewById(R.id.layoutWeather)
+
     }
 
     private fun setupRecyclerView() {
@@ -107,10 +111,14 @@ class MyLocation : Fragment() {
             @SuppressLint("SetTextI18n")
             override fun onLocationResult(p0: LocationResult) {
                 super.onLocationResult(p0)
-                p0.locations.lastOrNull()?.let { location ->
-                    latitude = location.latitude
-                    longitude = location.longitude
-                    getWeatherInfo()
+
+                if (isAdded) {
+                    p0.locations.lastOrNull()?.let { location ->
+                        latitude = location.latitude
+                        longitude = location.longitude
+                        requireContext()
+                        getWeatherInfo()
+                    }
                 }
             }
         }
@@ -129,32 +137,42 @@ class MyLocation : Fragment() {
 
         Log.e("API", "Api Called")
 
-        // Check if the fragment is attached to a context
         val currentContext = context
-        if (currentContext != null && isAdded) {
-            val url =
-                "https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=0e81ee6345f0bf08a5b26f1436c38b08"
-            val request = createJsonObjectRequest(
-                Request.Method.GET, url, { response ->
-                    try {
-                        parseWeatherInfo(response)
-                        pDialog.cancel()
-                    } catch (e: Exception) {
-                        Log.e("Error", e.toString())
-                    }
-                },
-                { error ->
-                    Log.e("API", "Response Errors")
-                    handleApiError(error)
-                    pDialog.cancel()
-                })
+        if (currentContext != null) {
+            try {
+                if (isAdded) {
+                    val url =
+                        "https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=0e81ee6345f0bf08a5b26f1436c38b08"
+                    val request = createJsonObjectRequest(
+                        Request.Method.GET, url, { response ->
+                            try {
+                                parseWeatherInfo(response)
+                                pDialog.cancel()
+                            } catch (e: Exception) {
+                                Log.e("Error", "Error parsing weather info: ${e.toString()}")
+                            }
+                        },
+                        { error ->
+                            Log.e("API", "Response Errors")
+                            handleApiError(error)
+                            pDialog.cancel()
+                        })
 
-            Volley.newRequestQueue(currentContext).add(request)
+                    Volley.newRequestQueue(currentContext).add(request)
+                } else {
+                    Log.e("Error", "Fragment not added: ${this}")
+                    pDialog.cancel()
+                }
+            } catch (e: IllegalStateException) {
+                Log.e("Error", "IllegalStateException: ${e.message}")
+                pDialog.cancel()
+            }
         } else {
             Log.e("Error", "Fragment not attached to a context")
             pDialog.cancel()
         }
     }
+
     private fun createProgressDialog(): SweetAlertDialog {
         val pDialog = SweetAlertDialog(requireContext(), SweetAlertDialog.PROGRESS_TYPE)
         pDialog.progressHelper.barColor = Color.parseColor("#A5DC86")
@@ -174,37 +192,90 @@ class MyLocation : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun parseWeatherInfo(response: JSONObject) {
-        val geocoder = Geocoder(requireContext(), Locale.getDefault())
-        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
-        val cityName = addresses!![0].locality
+        if (isAdded) {
+            val geocoder = Geocoder(requireContext(), Locale.getDefault())
+            val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+            val cityName = addresses!![0].locality
 
-        lblLocation.text = cityName
-        lblDescription.text =
-            "Weather Description : " + response.getJSONArray("weather")
-                .getJSONObject(0).getString("description")
-        lblTemp.text =
-            "Temperature : " + response.getJSONObject("main").getString("temp") + " °F"
-        lblPressure.text =
-            "Pressure : " + response.getJSONObject("main").getString("pressure")
-        lblHumidity.text =
-            "Humidity : " + response.getJSONObject("main").getString("humidity")
-        lblWindSpeed.text =
-            "Wind Speed : " + response.getJSONObject("wind").getString("speed")
+            lblLocation.text = cityName
+            val weatherDescription =
+                response.getJSONArray("weather").getJSONObject(0).getString("description")
+            lblDescription.text = "Description : $weatherDescription"
+            lblTemp.text = "Temperature : " + String.format(
+                "%.1f",
+                (response.getJSONObject("main").getString("temp").toDouble() - 273.15)
+            ) + " °C"
 
-        val imageURL =
-            "https://openweathermap.org/img/w/" + response.getJSONArray("weather")
-                .getJSONObject(0).getString("icon") + ".png"
+            lblPressure.text =
+                "Pressure : " + response.getJSONObject("main").getString("pressure")
+            lblHumidity.text =
+                "Humidity : " + response.getJSONObject("main").getString("humidity")
+            lblWindSpeed.text =
+                "Wind Speed : " + response.getJSONObject("wind").getString("speed")
 
-        Picasso.get().load(imageURL).into(imgIcon)
 
-        // Call the function to get daily forecast
-        getDailyForecast(latitude, longitude) { newForecastList ->
-            // Update the forecastList with the new data
-            forecastList.clear()
-            forecastList.addAll(newForecastList)
-            // Notify the adapter that the data has changed
-            forecastAdapter.notifyDataSetChanged()
+            relativeLayout.setBackgroundColor(getColorForWeatherDescription(weatherDescription))
+
+            val imageURL =
+                "https://openweathermap.org/img/w/" + response.getJSONArray("weather")
+                    .getJSONObject(0).getString("icon") + ".png"
+
+            Picasso.get().load(imageURL).into(imgIcon)
+
+            // Call the function to get daily forecast
+            getDailyForecast(latitude, longitude) { newForecastList ->
+                // Update the forecastList with the new data
+                forecastList.clear()
+                forecastList.addAll(newForecastList)
+                // Notify the adapter that the data has changed
+                forecastAdapter.notifyDataSetChanged()
+            }
         }
+    }
+
+    private fun getColorForWeatherDescription(weatherDescription: String): Int {
+        return when (weatherDescription.lowercase(Locale.getDefault())) {
+            //Thunderstorm
+            "thunderstorm with light rain", "thunderstorm with rain", "thunderstorm with heavy rain",
+            "light thunderstorm", "thunderstorm", "heavy thunderstorm", "ragged thunderstorm",
+            "thunderstorm with light drizzle", "thunderstorm with drizzle", "thunderstorm with heavy drizzle" ->
+                Color.parseColor("#800000") // Maroon
+
+            //Drizzle
+            "light intensity drizzle", "drizzle", "heavy intensity drizzle",
+            "light intensity drizzle rain", "drizzle rain", "heavy intensity drizzle rain",
+            "shower rain and drizzle", "heavy shower rain and drizzle", "shower drizzle" ->
+                Color.parseColor("#008080") // Teal
+
+            //Rain
+            "light rain", "moderate rain", "heavy intensity rain", "very heavy rain", "extreme rain",
+            "freezing rain", "light intensity shower rain", "shower rain", "heavy intensity shower rain",
+            "ragged shower rain" ->
+                Color.parseColor("#708090") // Slate Gray
+
+            //Snow
+            "light snow", "snow", "heavy snow", "sleet", "light shower sleet",
+            "shower sleet", "light rain and snow", "rain and snow", "light shower snow",
+            "shower snow", "heavy shower snow" ->
+                Color.parseColor("#FFFFFF") // White
+
+            //Atmosphere
+            "mist", "smoke", "haze", "sand/dust whirls", "fog", "sand", "dust",
+            "volcanic ash", "squalls", "tornado" ->
+                Color.parseColor("#D3D3D3") // Light Gray
+
+            // Clear
+            "clear sky" ->
+                Color.parseColor("#87CEEB") // Sky Blue
+
+            //Clouds
+            "few clouds: 11-25%", "scattered clouds: 25-50%", "broken clouds: 51-84%",
+            "overcast clouds: 85-100%", "overcast clouds", "scattered clouds", "broken clouds" ->
+                Color.parseColor("#A9A9A9") // Slight grey
+
+            else -> Color.WHITE
+        }
+
     }
 
     private fun getDailyForecast(
@@ -212,31 +283,33 @@ class MyLocation : Fragment() {
         longitude: Double,
         callback: (List<Forcast>) -> Unit
     ) {
-        Log.e("API", "Api Called")
-        val url =
-            "https://api.openweathermap.org/data/2.5/forecast?lat=$latitude&lon=$longitude&appid=0e81ee6345f0bf08a5b26f1436c38b08"
-        val request = createJsonObjectRequest(
-            Request.Method.GET, url,
-            { response ->
-                try {
-                    val newForecastList = parseDailyForecast(response)
-                    callback.invoke(newForecastList)
-                } catch (e: Exception) {
-                    Log.e("Error", e.toString())
-                    Toast.makeText(
-                        requireContext(),
-                        "Error processing forecast data: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+        if (isAdded) {
+            Log.e("API", "Api Called")
+            val url =
+                "https://api.openweathermap.org/data/2.5/forecast?lat=$latitude&lon=$longitude&appid=0e81ee6345f0bf08a5b26f1436c38b08"
+            val request = createJsonObjectRequest(
+                Request.Method.GET, url,
+                { response ->
+                    try {
+                        val newForecastList = parseDailyForecast(response)
+                        callback.invoke(newForecastList)
+                    } catch (e: Exception) {
+                        Log.e("Error", e.toString())
+                        Toast.makeText(
+                            requireContext(),
+                            "Error processing forecast data: ${e.message}",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                },
+                { error ->
+                    Log.e("API", "Response Errors")
+                    handleApiError(error)
                 }
-            },
-            { error ->
-                Log.e("API", "Response Errors")
-                handleApiError(error)
-            }
-        )
+            )
 
-        Volley.newRequestQueue(requireContext()).add(request)
+            Volley.newRequestQueue(requireContext()).add(request)
+        }
     }
 
     private fun parseDailyForecast(response: JSONObject): List<Forcast> {
@@ -255,8 +328,10 @@ class MyLocation : Fragment() {
             if (calendar.get(Calendar.HOUR_OF_DAY) == 9) {
                 val dayOfWeek =
                     date?.let { SimpleDateFormat("EEEE", Locale.getDefault()).format(it) }
-                val temperature =
-                    forecastJsonObject.getJSONObject("main").getString("temp") + " °F"
+                val temperature = String.format(
+                    "%.1f",
+                    forecastJsonObject.getJSONObject("main").getString("temp").toDouble() - 273.15
+                ) + " °C"
                 val weatherDescription =
                     forecastJsonObject.getJSONArray("weather").getJSONObject(0)
                         .getString("description")
@@ -284,11 +359,14 @@ class MyLocation : Fragment() {
     }
 
     private fun handleApiError(error: VolleyError) {
-        Toast.makeText(
-            requireContext(),
-            "API response error: ${error.toString()}",
-            Toast.LENGTH_LONG
-        ).show()
+
+        if (isAdded) {
+            Toast.makeText(
+                requireContext(),
+                "API response error: ${error.toString()}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 
 }

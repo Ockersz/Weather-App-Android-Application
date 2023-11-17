@@ -52,6 +52,7 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
     private lateinit var btnAdd: FloatingActionButton
     private lateinit var btnAddCity: Button
     private lateinit var spnCity: Spinner
+    private lateinit var relativeLayout: RelativeLayout
 
     private val rotateOpen: Animation by lazy {
         AnimationUtils.loadAnimation(requireContext(), R.anim.rotate_open_animation)
@@ -99,6 +100,7 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
         btnAddCity = view.findViewById(R.id.btnAddCity)
         spnCity = view.findViewById(R.id.spnCity)
         recyclerView = view.findViewById(R.id.weatherForcast)
+        relativeLayout = view.findViewById(R.id.layoutBackground)
     }
 
     private fun setupRecyclerView() {
@@ -110,7 +112,6 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
         forecastAdapter = ForecastAdapter(forecastList)
         recyclerView.adapter = forecastAdapter
     }
-
 
     private fun setupSpinner() {
         val adapter: ArrayAdapter<String> =
@@ -176,7 +177,6 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
         }
     }
 
-
     override fun onNothingSelected(parent: AdapterView<*>?) {}
 
     private fun onAddButtonClicked() {
@@ -222,6 +222,7 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
         Volley.newRequestQueue(requireContext()).add(request)
     }
 
+
     private fun createProgressDialog(): SweetAlertDialog {
         val pDialog = SweetAlertDialog(requireContext(), SweetAlertDialog.PROGRESS_TYPE)
         pDialog.progressHelper.barColor = Color.parseColor("#A5DC86")
@@ -241,19 +242,70 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
 
     @SuppressLint("SetTextI18n")
     private fun parseWeatherInfo(response: JSONObject) {
-        lblDescription.text =
-            "Weather Description : " + response.getJSONArray("weather").getJSONObject(0)
-                .getString("description")
-        lblTemp.text = "Temperature : " + response.getJSONObject("main").getString("temp") + " °F"
+        val weatherDescription =
+            response.getJSONArray("weather").getJSONObject(0).getString("description")
+
+        lblDescription.text = "Description : $weatherDescription"
+        lblTemp.text = "Temperature : " + String.format(
+            "%.1f",
+            (response.getJSONObject("main").getString("temp").toDouble() - 273.15)
+        ) + " °C"
         lblPressure.text = "Pressure : " + response.getJSONObject("main").getString("pressure")
         lblHumidity.text = "Humidity : " + response.getJSONObject("main").getString("humidity")
         lblWindSpeed.text = "Wind Speed : " + response.getJSONObject("wind").getString("speed")
+
+        relativeLayout.setBackgroundColor(getColorForWeatherDescription(weatherDescription))
 
         val imageURL =
             "https://openweathermap.org/img/w/" + response.getJSONArray("weather").getJSONObject(0)
                 .getString("icon") + ".png"
 
         Picasso.get().load(imageURL).into(imgIcon)
+    }
+
+
+    private fun getColorForWeatherDescription(weatherDescription: String): Int {
+        return when (weatherDescription.lowercase(Locale.getDefault())) {
+            // Thunderstorm
+            "thunderstorm with light rain", "thunderstorm with rain", "thunderstorm with heavy rain",
+            "light thunderstorm", "thunderstorm", "heavy thunderstorm", "ragged thunderstorm",
+            "thunderstorm with light drizzle", "thunderstorm with drizzle", "thunderstorm with heavy drizzle" ->
+                Color.parseColor("#800000") // Maroon
+
+            // Drizzle
+            "light intensity drizzle", "drizzle", "heavy intensity drizzle",
+            "light intensity drizzle rain", "drizzle rain", "heavy intensity drizzle rain",
+            "shower rain and drizzle", "heavy shower rain and drizzle", "shower drizzle" ->
+                Color.parseColor("#008080") // Teal
+
+            // Rain
+            "light rain", "moderate rain", "heavy intensity rain", "very heavy rain", "extreme rain",
+            "freezing rain", "light intensity shower rain", "shower rain", "heavy intensity shower rain",
+            "ragged shower rain" ->
+                Color.parseColor("#708090") // Slate Gray
+
+            // Snow
+            "light snow", "snow", "heavy snow", "sleet", "light shower sleet",
+            "shower sleet", "light rain and snow", "rain and snow", "light shower snow",
+            "shower snow", "heavy shower snow" ->
+                Color.parseColor("#FFFFFF") // White
+
+            // Atmosphere
+            "mist", "smoke", "haze", "sand/dust whirls", "fog", "sand", "dust",
+            "volcanic ash", "squalls", "tornado" ->
+                Color.parseColor("#D3D3D3") // Light Gray
+
+            // Clear
+            "clear sky" ->
+                Color.parseColor("#87CEEB") // Sky Blue
+
+            // Clouds
+            "few clouds: 11-25%", "scattered clouds: 25-50%", "broken clouds: 51-84%",
+            "overcast clouds: 85-100%", "overcast clouds", "scattered clouds", "broken clouds" ->
+                Color.parseColor("#A9A9A9") // Slight grey
+
+            else -> Color.WHITE
+        }
     }
 
     private fun getDailyForecast(city: String, callback: (List<Forcast>) -> Unit) {
@@ -296,7 +348,7 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
             if (calendar.get(Calendar.HOUR_OF_DAY) == 9) {
                 val dayOfWeek =
                     date?.let { SimpleDateFormat("EEEE", Locale.getDefault()).format(it) }
-                val temperature = forecastJsonObject.getJSONObject("main").getString("temp") + " °F"
+                val temperature = String.format("%.1f",forecastJsonObject.getJSONObject("main").getString("temp").toDouble() - 273.15 ) + " °C"
                 val weatherDescription = forecastJsonObject.getJSONArray("weather").getJSONObject(0)
                     .getString("description")
                 val iconCode =

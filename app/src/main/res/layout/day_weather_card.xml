@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_marginHorizontal="10dp"
     android:layout_marginVertical="12dp"
-    app:cardBackgroundColor="@color/white"
+    app:cardBackgroundColor="@color/blue_btn_bg_color"
     app:cardCornerRadius="10dp"
     app:cardElevation="8dp">
 
@@ -19,25 +19,30 @@
             android:id="@+id/txtDay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Day"
+            android:text="@string/day"
             android:layout_marginTop="5dp"
             android:textSize="22sp"
-            android:textAlignment="center"/>
+            android:textAlignment="center"
+            android:textColor="@color/black"
+            android:textStyle="bold"/>
 
         <ImageView
             android:id="@+id/imgWeather"
             android:layout_width="match_parent"
             android:layout_height="90dp"
-            app:srcCompat="@android:drawable/ic_input_add" />
+            app:srcCompat="@android:drawable/ic_input_add"
+            android:textColor="@color/black"
+            android:contentDescription="@string/todo" />
 
         <TextView
             android:id="@+id/txtTemp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Temp"
+            android:text="@string/temperature"
             android:textAlignment="center"
             android:layout_marginTop="5dp"
             android:textSize="24sp"
+            android:textColor="@color/black"
             />
 
         <TextView
@@ -47,7 +52,8 @@
             android:textAlignment="center"
             android:layout_marginTop="5dp"
             android:textSize="18sp"
-            android:text="Description" />
+            android:text="@string/description"
+            android:textColor="@color/black"/>
 
 
     </LinearLayout>
