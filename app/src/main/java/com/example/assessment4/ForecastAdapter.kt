@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import com.squareup.picasso.Picasso
 
 class ForecastAdapter(private val forecastList: List<Forcast>) :
     RecyclerView.Adapter<ForecastAdapter.ForecastHolder>() {
@@ -29,7 +30,7 @@ class ForecastAdapter(private val forecastList: List<Forcast>) :
     override fun onBindViewHolder(holder: ForecastHolder, position: Int) {
         val forcast = forecastList[position]
         holder.txtDay.text = forcast.day
-        //holder.imgWeather.setImageResource(forcast.weatherImage)
+        Picasso.get().load(forcast.weatherImage).into(holder.imgWeather)
         holder.txtTemp.text = forcast.temp
         holder.txtDescription.text = forcast.description
     }

@@ -305,7 +305,7 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
 
                 newForecastList.add(
                     Forcast(
-                        dayOfWeek, 1, // replace with the appropriate image resource ID
+                        dayOfWeek, imageURL, // replace with the appropriate image resource ID
                         temperature, weatherDescription
                     )
                 )

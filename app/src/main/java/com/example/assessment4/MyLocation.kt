@@ -3,10 +3,10 @@ package com.example.assessment4
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.location.Geocoder
 import android.os.Bundle
 import android.os.Looper
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +14,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import cn.pedant.SweetAlert.SweetAlertDialog
@@ -26,7 +27,6 @@ import com.squareup.picasso.Picasso
 import org.json.JSONObject
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.collections.ArrayList
 import kotlin.properties.Delegates
 
 class MyLocation : Fragment() {
@@ -108,8 +108,6 @@ class MyLocation : Fragment() {
             override fun onLocationResult(p0: LocationResult) {
                 super.onLocationResult(p0)
                 p0.locations.lastOrNull()?.let { location ->
-                    lblLocation.text =
-                        "Latitude : ${location.latitude} \n Longitude : ${location.longitude}"
                     latitude = location.latitude
                     longitude = location.longitude
                     getWeatherInfo()
@@ -133,7 +131,7 @@ class MyLocation : Fragment() {
 
         // Check if the fragment is attached to a context
         val currentContext = context
-        if (currentContext != null) {
+        if (currentContext != null && isAdded) {
             val url =
                 "https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=0e81ee6345f0bf08a5b26f1436c38b08"
             val request = createJsonObjectRequest(
@@ -157,7 +155,6 @@ class MyLocation : Fragment() {
             pDialog.cancel()
         }
     }
-
     private fun createProgressDialog(): SweetAlertDialog {
         val pDialog = SweetAlertDialog(requireContext(), SweetAlertDialog.PROGRESS_TYPE)
         pDialog.progressHelper.barColor = Color.parseColor("#A5DC86")
@@ -177,6 +174,11 @@ class MyLocation : Fragment() {
 
     @SuppressLint("SetTextI18n")
     private fun parseWeatherInfo(response: JSONObject) {
+        val geocoder = Geocoder(requireContext(), Locale.getDefault())
+        val addresses = geocoder.getFromLocation(latitude, longitude, 1)
+        val cityName = addresses!![0].locality
+
+        lblLocation.text = cityName
         lblDescription.text =
             "Weather Description : " + response.getJSONArray("weather")
                 .getJSONObject(0).getString("description")
@@ -266,7 +268,7 @@ class MyLocation : Fragment() {
                 newForecastList.add(
                     Forcast(
                         dayOfWeek,
-                        1, // replace with the appropriate image resource ID
+                        imageURL,
                         temperature,
                         weatherDescription
                     )
@@ -288,4 +290,5 @@ class MyLocation : Fragment() {
             Toast.LENGTH_LONG
         ).show()
     }
+
 }
