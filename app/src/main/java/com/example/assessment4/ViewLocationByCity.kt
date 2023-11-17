@@ -76,8 +76,7 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
     }
 
     override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_view_location_by_city, container, false)
 
@@ -107,12 +106,6 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
         recyclerView.layoutManager =
             LinearLayoutManager(requireContext(), RecyclerView.HORIZONTAL, false)
         forecastList = ArrayList()
-
-        forecastList.add(Forcast("Day",1,"sda","Sda"))
-        forecastList.add(Forcast("Day",1,"sda","Sda"))
-        forecastList.add(Forcast("Day",1,"sda","Sda"))
-        forecastList.add(Forcast("Day",1,"sda","Sda"))
-        forecastList.add(Forcast("Day",1,"sda","Sda"))
 
         forecastAdapter = ForecastAdapter(forecastList)
         recyclerView.adapter = forecastAdapter
@@ -213,22 +206,18 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
         Log.e("API", "Api Called")
         val url =
             "https://api.openweathermap.org/data/2.5/weather?q=$city&appid=0e81ee6345f0bf08a5b26f1436c38b08"
-        val request = createJsonObjectRequest(
-            Request.Method.GET, url,
-            { response ->
-                try {
-                    parseWeatherInfo(response)
-                    pDialog.cancel()
-                } catch (e: Exception) {
-                    Log.e("Error", e.toString())
-                }
-            },
-            { error ->
-                Log.e("API", "Response Errors")
-                handleApiError(error)
+        val request = createJsonObjectRequest(Request.Method.GET, url, { response ->
+            try {
+                parseWeatherInfo(response)
                 pDialog.cancel()
+            } catch (e: Exception) {
+                Log.e("Error", e.toString())
             }
-        )
+        }, { error ->
+            Log.e("API", "Response Errors")
+            handleApiError(error)
+            pDialog.cancel()
+        })
 
         Volley.newRequestQueue(requireContext()).add(request)
     }
@@ -255,18 +244,14 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
         lblDescription.text =
             "Weather Description : " + response.getJSONArray("weather").getJSONObject(0)
                 .getString("description")
-        lblTemp.text =
-            "Temperature : " + response.getJSONObject("main").getString("temp") + " °F"
-        lblPressure.text =
-            "Pressure : " + response.getJSONObject("main").getString("pressure")
-        lblHumidity.text =
-            "Humidity : " + response.getJSONObject("main").getString("humidity")
-        lblWindSpeed.text =
-            "Wind Speed : " + response.getJSONObject("wind").getString("speed")
+        lblTemp.text = "Temperature : " + response.getJSONObject("main").getString("temp") + " °F"
+        lblPressure.text = "Pressure : " + response.getJSONObject("main").getString("pressure")
+        lblHumidity.text = "Humidity : " + response.getJSONObject("main").getString("humidity")
+        lblWindSpeed.text = "Wind Speed : " + response.getJSONObject("wind").getString("speed")
 
         val imageURL =
-            "https://openweathermap.org/img/w/" + response.getJSONArray("weather")
-                .getJSONObject(0).getString("icon") + ".png"
+            "https://openweathermap.org/img/w/" + response.getJSONArray("weather").getJSONObject(0)
+                .getString("icon") + ".png"
 
         Picasso.get().load(imageURL).into(imgIcon)
     }
@@ -275,26 +260,22 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
         Log.e("API", "Api Called")
         val url =
             "https://api.openweathermap.org/data/2.5/forecast?q=$city&appid=0e81ee6345f0bf08a5b26f1436c38b08"
-        val request = createJsonObjectRequest(
-            Request.Method.GET, url,
-            { response ->
-                try {
-                    val newForecastList = parseDailyForecast(response)
-                    callback.invoke(newForecastList)
-                } catch (e: Exception) {
-                    Log.e("Error", e.toString())
-                    Toast.makeText(
-                        requireContext(),
-                        "Error processing forecast data: ${e.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
-                }
-            },
-            { error ->
-                Log.e("API", "Response Errors")
-                handleApiError(error)
+        val request = createJsonObjectRequest(Request.Method.GET, url, { response ->
+            try {
+                val newForecastList = parseDailyForecast(response)
+                callback.invoke(newForecastList)
+            } catch (e: Exception) {
+                Log.e("Error", e.toString())
+                Toast.makeText(
+                    requireContext(),
+                    "Error processing forecast data: ${e.message}",
+                    Toast.LENGTH_LONG
+                ).show()
             }
-        )
+        }, { error ->
+            Log.e("API", "Response Errors")
+            handleApiError(error)
+        })
 
         Volley.newRequestQueue(requireContext()).add(request)
     }
@@ -315,22 +296,17 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
             if (calendar.get(Calendar.HOUR_OF_DAY) == 9) {
                 val dayOfWeek =
                     date?.let { SimpleDateFormat("EEEE", Locale.getDefault()).format(it) }
-                val temperature =
-                    forecastJsonObject.getJSONObject("main").getString("temp") + " °F"
-                val weatherDescription =
-                    forecastJsonObject.getJSONArray("weather").getJSONObject(0)
-                        .getString("description")
+                val temperature = forecastJsonObject.getJSONObject("main").getString("temp") + " °F"
+                val weatherDescription = forecastJsonObject.getJSONArray("weather").getJSONObject(0)
+                    .getString("description")
                 val iconCode =
-                    forecastJsonObject.getJSONArray("weather").getJSONObject(0)
-                        .getString("icon")
+                    forecastJsonObject.getJSONArray("weather").getJSONObject(0).getString("icon")
                 val imageURL = "https://openweathermap.org/img/w/$iconCode.png"
 
                 newForecastList.add(
                     Forcast(
-                        dayOfWeek,
-                        1, // replace with the appropriate image resource ID
-                        temperature,
-                        weatherDescription
+                        dayOfWeek, 1, // replace with the appropriate image resource ID
+                        temperature, weatherDescription
                     )
                 )
             }
@@ -345,9 +321,7 @@ class ViewLocationByCity : Fragment(), AdapterView.OnItemSelectedListener {
 
     private fun handleApiError(error: VolleyError) {
         Toast.makeText(
-            requireContext(),
-            "API response error: ${error.toString()}",
-            Toast.LENGTH_LONG
+            requireContext(), "API response error: ${error.toString()}", Toast.LENGTH_LONG
         ).show()
     }
 }
